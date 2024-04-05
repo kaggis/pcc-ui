@@ -1,0 +1,10 @@
+.circular-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+    }
+    
+    .circular-button:hover {
+    background-color: rgb(158, 158, 158);
+    }

@@ -18,6 +18,7 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
 import { StyleSheetManager } from 'styled-components';
+import './prefix.css';
 
 
 String.prototype.toPascalCase = function () {
@@ -66,16 +67,16 @@ const columns = [
     name: 'Actions',
     cell: (row) => (
       <div className="btn-group">
-        <Link className="btn btn-secondary btn-sm" to={`/prefixes/${row.id}`}>
+        <Link className="btn btn-default btn-sm circular-button" to={`/prefixes/${row.id}`} title="View Details">
           <FontAwesomeIcon icon="list" />
         </Link>
-        <Link className="btn btn-secondary btn-sm" to={`/prefixes/${row.id}/update`}>
+        <Link className="btn btn-default btn-sm circular-button" to={`/prefixes/${row.id}/update`} title="Update Prefix">
           <FontAwesomeIcon icon="edit" />
         </Link>
-        <Link className="btn btn-secondary btn-sm" to={`/prefixes/${row.id}/delete`}>
+        <Link className="btn btn-default btn-sm circular-button" to={`/prefixes/${row.id}/delete`} title="Delete Prefix">
           <FontAwesomeIcon icon="times" />
         </Link>
-        <Link className="btn btn-secondary btn-sm" to={`/prefixes/editstatistics/${row.id}`} >
+        <Link className="btn btn-default btn-sm circular-button" to={`/prefixes/editstatistics/${row.id}`} title="Edit Statistics">
           <FontAwesomeIcon icon={faChartBar} />
         </Link>
       </div>
@@ -89,6 +90,7 @@ const customStyles = {
     style: {
       color: '#202124',
       fontSize: '18px',
+      backgroundColor: '#F4F6F8',
     },
   },
   rows: {
@@ -120,16 +122,16 @@ const Prefixes = () => {
     let DM = new DataManager(config.endpoint);
     // DM.getDomains().then((response) => setDomains(response));
     DM.getDomains()
-    .then((response) => setDomains(response))
-    .catch((error) => console.error("Error fetching domains:", error));
+      .then((response) => setDomains(response))
+      .catch((error) => console.error("Error fetching domains:", error));
 
     DM.getPrefixes()
-    .then((response) => setPrefixes(response))
-    .catch((error) => console.error("Error fetching prefixes:", error));
+      .then((response) => setPrefixes(response))
+      .catch((error) => console.error("Error fetching prefixes:", error));
 
     DM.getProviders()
-    .then((response) => setProviders(response))
-    .catch((error) => console.error("Error fetching providers:", error));
+      .then((response) => setProviders(response))
+      .catch((error) => console.error("Error fetching providers:", error));
 
   }, []);
 
@@ -179,7 +181,7 @@ const Prefixes = () => {
             <Form.Select id="contactSelection" name="formSelectContact" aria-label="Default select example" onChange={(e) => setFilterContactType(e.target.value)} style={{ borderColor: '#6C757D' }} >
               <option id="All" value=''>All</option>
               {Object.entries(contract_type_t).map((contract) => (
-                <option id={contract[0]}  key={"contract-" + contract[0]} value={contract[0]}>
+                <option id={contract[0]} key={"contract-" + contract[0]} value={contract[0]}>
                   {contract[0]}
                 </option>
               ))}
@@ -189,7 +191,7 @@ const Prefixes = () => {
 
             <Form.Control id="searchField" name="filterText" aria-label="Input for searching the list" placeholder="Type to search ..." value={filterText} aria-describedby="button-addon2"
               onChange={(e) => setFilterText(e.target.value)} style={{ borderColor: '#6C757D' }} />
-              
+
             <Button variant="outline-secondary" id="button-addon2" onClick={handleClear} >
               <FontAwesomeIcon icon="times" id="button-addon2" />
             </Button>
@@ -220,20 +222,20 @@ const Prefixes = () => {
           </Tabs>
 
           <StyleSheetManager shouldForwardProp={(prop) => prop !== 'align'}>
-          {domains.length > 0 && (
-            <DataTable
-              columns={columns}
-              data={filteredPrefixesByDomain}
-              theme="default"
-              customStyles={customStyles}
-              highlightOnHover
-              pointerOnHover
-              pagination
-              paginationResetDefaultPage={resetPaginationToggle}
-              subHeader
-              subHeaderComponent={subHeaderComponentMemo}
-            />
-          )}
+            {domains.length > 0 && (
+              <DataTable
+                columns={columns}
+                data={filteredPrefixesByDomain}
+                theme="default"
+                customStyles={customStyles}
+                highlightOnHover
+                pointerOnHover
+                pagination
+                paginationResetDefaultPage={resetPaginationToggle}
+                subHeader
+                subHeaderComponent={subHeaderComponentMemo}
+              />
+            )}
           </StyleSheetManager>
         </div>
       )}
