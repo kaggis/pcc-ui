@@ -166,37 +166,34 @@ const Prefixes = () => {
     return (
       <>
         <div className="col-12">
-          <InputGroup id="filtering" className="mb-3">
-            <InputGroup.Text id="domainSelectionText" style={{ borderColor: '#6C757D' }}> Domains </InputGroup.Text>
-            <Form.Select id="domainSelection" name="formSelectDomain" aria-label="Domain Selection" onChange={(e) => setFilterDomains(e.target.value)} style={{ borderColor: '#6C757D' }} >
-              <option value=''>All</option>
-              {domains.length > 0 && domains.map((domain) => (
-                <option key={domain.id} value={domain.name}>
-                  {domain.name}
-                </option>
-              ))}
-            </Form.Select>
-
-            <InputGroup.Text id="contactSelectionText" style={{ borderColor: '#6C757D' }}> Contract Type </InputGroup.Text>
-            <Form.Select id="contactSelection" name="formSelectContact" aria-label="Default select example" onChange={(e) => setFilterContactType(e.target.value)} style={{ borderColor: '#6C757D' }} >
-              <option id="All" value=''>All</option>
-              {Object.entries(contract_type_t).map((contract) => (
-                <option id={contract[0]} key={"contract-" + contract[0]} value={contract[0]}>
-                  {contract[0]}
-                </option>
-              ))}
-            </Form.Select>
-
-            <InputGroup.Text id="searchText" style={{ borderColor: '#6C757D' }}> Search </InputGroup.Text>
-
-            <Form.Control id="searchField" name="filterText" aria-label="Input for searching the list" placeholder="Type to search ..." value={filterText} aria-describedby="button-addon2"
-              onChange={(e) => setFilterText(e.target.value)} style={{ borderColor: '#6C757D' }} />
-
-            <Button variant="outline-secondary" id="button-addon2" onClick={handleClear} >
-              <FontAwesomeIcon icon="times" id="button-addon2" />
-            </Button>
-
-          </InputGroup>
+          <div className="row mb-3">
+            <div className="col-3">
+              <Form.Select id="domainSelection" name="formSelectDomain" aria-label="Domain Selection" onChange={(e) => setFilterDomains(e.target.value)}   >
+                <option value=''>Select Domain</option>
+                {domains.length > 0 && domains.map((domain) => (
+                  <option key={domain.id} value={domain.name}>
+                    {domain.name}
+                  </option>
+                ))}
+              </Form.Select>
+            </div><div className="col-3">
+              <Form.Select id="contactSelection" name="formSelectContact" aria-label="Default select example" onChange={(e) => setFilterContactType(e.target.value)}   >
+                <option id="All" value=''>Select Contract</option>
+                {Object.entries(contract_type_t).map((contract) => (
+                  <option id={contract[0]} key={"contract-" + contract[0]} value={contract[0]}>
+                    {contract[0]}
+                  </option>
+                ))}
+              </Form.Select>
+            </div><div className="col-5">
+              <Form.Control id="searchField" name="filterText" aria-label="Input for searching the list" placeholder="Search ..." value={filterText} aria-describedby="button-addon2"
+                onChange={(e) => setFilterText(e.target.value)} />
+            </div><div className="col-1">
+              <Button variant="outline-primary" id="button-addon2" onClick={handleClear} >
+                Clear
+              </Button>
+            </div>
+          </div>
         </div>
       </>
     );
