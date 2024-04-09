@@ -15,7 +15,6 @@ import PrefixEditStats from "./PrefixEditStats";
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
 import { StyleSheetManager } from 'styled-components';
 import './prefix.css';
@@ -42,6 +41,17 @@ const columns = [
     name: 'Name',
     selector: row => row.name,
     sortable: true,
+    cell: (row) => (
+      <div className="row">
+        <div className="col-4" style={{ fontSize: "2rem" }}>
+          📦
+        </div>
+        <div className="col-8">
+          <div>{row.name} </div>
+          <div style={{ color: 'gray', fontSize: '12px' }}>by: {row.provider_name}</div>
+        </div>
+      </div>
+    ),
   },
   {
     name: 'Owner',
@@ -51,11 +61,6 @@ const columns = [
   {
     name: 'Domain',
     selector: row => row.domain_name,
-    sortable: true,
-  },
-  {
-    name: 'Provider',
-    selector: row => row.provider_name,
     sortable: true,
   },
   {
@@ -223,6 +228,7 @@ const Prefixes = () => {
               <DataTable
                 columns={columns}
                 data={filteredPrefixesByDomain}
+                defaultSortFieldId={1}
                 theme="default"
                 customStyles={customStyles}
                 highlightOnHover
