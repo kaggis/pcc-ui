@@ -1,8 +1,8 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect, useMemo } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "@fortawesome/fontawesome-free-solid";
-import { faChartBar } from '@fortawesome/free-solid-svg-icons';
+import { faList, faEdit, faChartBar, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import "react-datepicker/dist/react-datepicker.css";
 import DataManager from "../../api/DataManager";
 import config from "../../config";
@@ -12,12 +12,9 @@ import PrefixAdd from "./PrefixAdd"
 import PrefixUpdate from "./PrefixUpdate"
 import PrefixLookup from "./PrefixLookup"
 import PrefixEditStats from "./PrefixEditStats";
-import Tab from 'react-bootstrap/Tab';
-import Tabs from 'react-bootstrap/Tabs';
-import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
 import { StyleSheetManager } from 'styled-components';
 import './prefix.css';
+import { OverlayTrigger, Tooltip, Button, Tab, Tabs, Form } from 'react-bootstrap';
 
 
 String.prototype.toPascalCase = function () {
@@ -35,6 +32,19 @@ const contract_type_t = {
   "PROJECT": "PROJECT",
   "OTHER": "OTHER"
 };
+
+const tooltipList = (
+  <Tooltip id="tooltip">View Details</Tooltip>
+);
+const tooltipEdit = (
+  <Tooltip id="tooltip">Update Prefix</Tooltip>
+);
+const tooltipTimes = (
+  <Tooltip id="tooltip">Delete Prefix</Tooltip>
+);
+const tooltipChartBar = (
+  <Tooltip id="tooltip">Edit Statistics</Tooltip>
+);
 
 const columns = [
   {
@@ -72,24 +82,31 @@ const columns = [
     name: 'Actions',
     cell: (row) => (
       <div className="btn-group">
-        <Link className="btn btn-default btn-sm circular-button" to={`/prefixes/${row.id}`} title="View Details">
-          <FontAwesomeIcon icon="list" />
-        </Link>
-        <Link className="btn btn-default btn-sm circular-button" to={`/prefixes/${row.id}/update`} title="Update Prefix">
-          <FontAwesomeIcon icon="edit" />
-        </Link>
-        <Link className="btn btn-default btn-sm circular-button" to={`/prefixes/${row.id}/delete`} title="Delete Prefix">
-          <FontAwesomeIcon icon="times" />
-        </Link>
-        <Link className="btn btn-default btn-sm circular-button" to={`/prefixes/editstatistics/${row.id}`} title="Edit Statistics">
-          <FontAwesomeIcon icon={faChartBar} />
-        </Link>
+        <OverlayTrigger placement="top" overlay={tooltipList}>
+          <Button variant="light" size="sm" onClick={() => window.location.href = `/prefixes/${row.id}`}>
+            <FontAwesomeIcon icon={faList} />
+          </Button>
+        </OverlayTrigger>
+        <OverlayTrigger placement="top" overlay={tooltipEdit}>
+          <Button variant="light" size="sm" onClick={() => window.location.href = `/prefixes/${row.id}/update`}>
+            <FontAwesomeIcon icon={faEdit} />
+          </Button>
+        </OverlayTrigger>
+        <OverlayTrigger placement="top" overlay={tooltipTimes}>
+          <Button variant="light" size="sm" onClick={() => window.location.href = `/prefixes/${row.id}/delete`}>
+            <FontAwesomeIcon icon={faTrashCan} />
+          </Button>
+        </OverlayTrigger>
+        <OverlayTrigger placement="top" overlay={tooltipChartBar}>
+          <Button variant="light" size="sm" onClick={() => window.location.href = `/prefixes/editstatistics/${row.id}`}>
+            <FontAwesomeIcon icon={faChartBar} />
+          </Button>
+        </OverlayTrigger>
       </div>
     ),
   },
 ];
 
-// Custom style for the table, to have a bigger font and colored rows on hover
 const customStyles = {
   headCells: {
     style: {
@@ -125,7 +142,6 @@ const Prefixes = () => {
 
   useEffect(() => {
     let DM = new DataManager(config.endpoint);
-    // DM.getDomains().then((response) => setDomains(response));
     DM.getDomains()
       .then((response) => setDomains(response))
       .catch((error) => console.error("Error fetching domains:", error));
