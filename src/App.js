@@ -9,9 +9,9 @@ import Domains from "./components/Domains";
 import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
-import { Providers, ProviderDetails } from "./components/Providers";
+import Providers from "./components/Providers";
 import { Prefixes, PrefixDetails, PrefixAdd, PrefixUpdate, PrefixLookup, PrefixEditStats } from "./components/Prefixes/Prefixes";
-import { Services, ServicesDetails } from "./components/Services";
+import Services from "./components/Services";
 
 
 function App() {
@@ -38,11 +38,6 @@ function App() {
                     exact
                     path="/providers"
                     element={<Providers />}
-                  />
-                  <Route
-                    exact
-                    path="/providers/:name"
-                    element={<ProviderDetails />}
                   />
                   <Route
                     path="/prefixes"
@@ -82,11 +77,6 @@ function App() {
                     exact
                     path="/services"
                     element={<Services />}
-                  />
-                  <Route
-                    exact
-                    path="/services/:name"
-                    element={<ServicesDetails />}
                   />
                 </Routes>
               </main>
