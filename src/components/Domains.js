@@ -19,17 +19,15 @@ const Domains = () => {
       name: "Name",
       selector: (row) => row.name,
       sortable: true,
-      width: "300px", 
+      width: "300px",
     },
     {
       name: 'Description',
       selector: row => row.description,
       sortable: true,
       cell: (row) => (
-        <div className="row">
-          <div className="m-2">
-            <div>{row.description} </div>
-          </div>
+        <div className="m-2">
+          <div className="text-wrap">{row.description} </div>
         </div>
       ),
     },
