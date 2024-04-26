@@ -80,3 +80,8 @@ code {
 .required {
   color: red;
 }
+
+
+.div-info-icon {
+  font-weight: normal;
+}

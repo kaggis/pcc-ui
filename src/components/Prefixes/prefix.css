@@ -8,3 +8,18 @@
     .circular-button:hover {
     background-color: rgb(158, 158, 158);
     }
+
+
+    .btn-bd-warning {
+        --bs-btn-font-weight: 600;
+        --bs-btn-color: var(--bs-white);
+        --bs-btn-bg: #F69B19; /* Change background color to #F69B19 */
+        --bs-btn-border-color: #F69B19; /* Change border color to #F69B19 */
+        --bs-btn-hover-color: var(--bs-white);
+        --bs-btn-hover-bg: #D57D00; /* Change hover background color to a shade of #F69B19 */
+        --bs-btn-hover-border-color: #D57D00; /* Change hover border color to a shade of #F69B19 */
+        --bs-btn-focus-shadow-rgb: #F69B19; /* Change focus shadow color to #F69B19 */
+        --bs-btn-active-color: var(--bs-btn-hover-color);
+        --bs-btn-active-bg: #B96A00; /* Change active background color to a shade of #F69B19 */
+        --bs-btn-active-border-color: #B96A00; /* Change active border color to a shade of #F69B19 */
+      }
