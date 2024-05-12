@@ -27,7 +27,20 @@ const customStyles = {
     },
 };
 
-const ExpandedComponent = ({ data }) => <pre>{JSON.stringify(data, null, 2)}</pre>;
+const ExpandedComponent = ({ data }) => {
+    const additionalData = data.values.filter(item => item.type !== 'URL');
+
+    return (
+        <div className="m-4" style={{ fontSize: '16px' }}>
+            {additionalData.map((item, index) => (
+                <div key={index}>
+                    <pre>{JSON.stringify(item.type, null, 2)}:
+                        {JSON.stringify(item.value, null, 2)}</pre>
+                </div>
+            ))}
+        </div>
+    );
+};
 
 const PrefixLookup = () => {
     const [filters, setReverseLookUpFilters] = useState([]);
@@ -68,7 +81,23 @@ const PrefixLookup = () => {
                 name: "Handle",
                 selector: (row) => row.handle,
                 sortable: false,
-            }
+                width: '500px'
+            },
+            {
+                name: "URL",
+                selector: (row) => {
+                    const urlValue = row.values.find(item => item.type === 'URL');
+                    return urlValue ? urlValue.value : '';
+                },
+                sortable: false,
+            },
+            {
+                name: "Metadata",
+                cell: (row) => ("Click to expand"),
+                sortable: false,
+                width: '200px'
+            },
+
         ],
         []
     );
@@ -113,6 +142,8 @@ const PrefixLookup = () => {
                             {f}
                         </option>
                     );
+                } else if (f === "EMAIL") {
+                    // Does not display anything
                 } else {
                     filtersDiv.push(
                         <div key={"filter-div-" + i} className="mb-3 row">
@@ -203,13 +234,6 @@ const PrefixLookup = () => {
     };
 
     filtersDivCreate();
-
-    let tableColumns = [];
-    if (handles && handles.length > 0 && handles[0].values) {
-        tableColumns = columnsDetailed;
-    } else {
-        tableColumns = columns;
-    }
 
     return (
         <div className="container-fluid">
@@ -306,9 +330,8 @@ const PrefixLookup = () => {
                             </Form>
                         </Formik>
                         <br />
-                        <br/>
+                        <br />
                         <DataTable
-                            columns={tableColumns}
                             data={handles}
                             defaultSortFieldId={1}
                             theme="default"
@@ -316,9 +339,14 @@ const PrefixLookup = () => {
                             highlightOnHover
                             pointerOnHover
                             pagination
-                            expandableRows
-                            expandableRowsComponent={ExpandedComponent}
-                        />
+                            {...(handles && handles.length > 0 && handles[0].values.length > 1 ? {
+                                columns: columnsDetailed,
+                                expandableRows: true,
+                                expandOnRowClicked: true,
+                                expandableRowsComponent: ExpandedComponent
+                            } : {
+                                columns: columns
+                            })} />
                     </>
                 )}
             </div>
