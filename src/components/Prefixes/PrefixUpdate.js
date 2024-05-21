@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Alert from "../Alert";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import moment from 'moment'
-
 import { Controller, useForm } from "react-hook-form";
 import DatePicker from 'react-datepicker';
-
 import DataManager from "../../api/DataManager";
 import config from "../../config";
 import { PrefixLabels } from "./info"
@@ -14,12 +12,6 @@ import { PrefixLabels } from "./info"
 const status_t = {
   0: "Missing",
   1: "Exists"
-};
-
-const contract_type_t = {
-  "CONTRACT": "CONTRACT",
-  "PROJECT": "PROJECT",
-  "OTHER": "OTHER"
 };
 
 const PrefixUpdate = () => {
@@ -56,10 +48,10 @@ const PrefixUpdate = () => {
         contact_name: response.contact_name,
         contact_email: response.contact_email,
         contract_end: response.contract_end ? moment(response.contract_end, dateFormat).toDate() : null,
-        contract_type: response.contract_type,
+        contract_type_id: response.contract_type_id,
         used_by: response.used_by,
-        status: response.status !== null ? response.status : "",
-        lookup_service_type: response.lookup_service_type !== null ? response.lookup_service_type : ""
+        status: response.status,
+        lookup_service_type_id: response.lookup_service_type_id
       };
       setDefaultFormValues(d)
       reset(d);
@@ -90,11 +82,19 @@ const PrefixUpdate = () => {
     });
   }, []);
 
-  const [lookup_service_types, setLookUpServiceTypes] = useState([]);
+  const [contract_types, setContractTypes] = useState([]);
   useEffect(() => {
     let DM = new DataManager(config.endpoint);
-    DM.getReverseLookUpTypes().then((response) => {
-      setLookUpServiceTypes(response);
+    DM.getCodelistContract().then((response) => {
+      setContractTypes(response);
+    });
+  }, []);
+
+  const [lookup_types, setLookUpTypes] = useState([]);
+  useEffect(() => {
+    let DM = new DataManager(config.endpoint);
+    DM.getCodelistLookup().then((response) => {
+      setLookUpTypes(response);
     });
   }, []);
 
@@ -138,48 +138,20 @@ const PrefixUpdate = () => {
     });
   };
 
-  const lookup_service_type_select = (
-    <>
-      <label htmlFor="status" className="form-label fw-bold">
-        <span className="required">*</span>
-        {PrefixLabels.lookupType.label}
-      </label>
-      <span className="info-icon"> i
-        <span className="info-text">
-          {PrefixLabels.lookupType.info}
-        </span>
-      </span>
-      <select
-        className={`form-select ${errors.lookup_service_type ? "is-invalid" : ""}`}
-        id="lookupServiceType"
-        {...register("lookup_service_type", { required: " must be selected" })}>
-        <option value="">
-          Select Type
-        </option>
-        {lookup_service_types &&
-          lookup_service_types.map((t, i) => {
-            return (
-              <option key={`type-${i}`} value={t}>
-                {t}
-              </option>
-            );
-          })}
-      </select>
-      {errors.lookup_service_type && (
-        <div className="invalid-feedback">{PrefixLabels.lookupType.label + errors.lookup_service_type.message}</div>
-      )}
-    </>
-  );
-
   return (
-    <div className="container">
+    <div>
       {alert &&
         <Alert type={alertType} message={alertMessage} />
       }
-      <form onSubmit={handleSubmit(onformSubmit)}>
-        <div className="row text-start mt-4">
-          <h2>Update prefix</h2>
-          <p className="text-muted"><span className="required">*</span>Indicates a required field</p>
+      <div className="col mx-4 mt-4" >
+        <h2 className="view-title">
+          <i> <FontAwesomeIcon icon="edit" size="lg" /></i>
+          <span>Update prefix</span>
+        </h2>
+        <p className="text-muted"><span className="required">*</span>Indicates a required field</p>
+
+        <form onSubmit={handleSubmit(onformSubmit)}>
+
           <div className="form-group">
             <legend>Prefix Details</legend>
             <div className="form-row">
@@ -395,25 +367,47 @@ const PrefixUpdate = () => {
                   </span>
                 </span>
                 <select
-                  className={`form-select ${errors.contract_type ? "is-invalid" : ""}`}
+                  className={`form-select ${errors.contract_type_id ? "is-invalid" : ""}`}
                   id="prefixContractType"
-                  {...register("contract_type", { required: " must be selected" })}>
+                  {...register("contract_type_id", { required: " must be selected" })}>
                   <option value="">
                     Select Contract Type
                   </option>
-                  {Object.entries(contract_type_t).map((contract) => (
-                    <option key={"contract-" + contract[0]} value={contract[0]}>
-                      {contract[0]}
+                  {contract_types.map((contract) => (
+                    <option key={contract.id} value={contract.id}>
+                      {contract.name}{" "}
                     </option>
                   ))}
                 </select>
-                {errors.contract_type &&
-                  (<div className="invalid-feedback">{PrefixLabels.contractType.label + errors.contract_type.message}</div>)}
+                {errors.contract_type_id &&
+                  (<div className="invalid-feedback">{PrefixLabels.contractType.label + errors.contract_type_id.message}</div>)}
               </div>
               <div className="mb-3">
-                {lookup_service_types && lookup_service_types.length > 0
-                  ? lookup_service_type_select
-                  : null}
+                <label htmlFor="status" className="form-label fw-bold">
+                  <span className="required">*</span>
+                  {PrefixLabels.lookupType.label}
+                </label>
+                <span className="info-icon"> i
+                  <span className="info-text">
+                    {PrefixLabels.lookupType.info}
+                  </span>
+                </span>
+                <select
+                  className={`form-select ${errors.lookup_service_type_id ? "is-invalid" : ""}`}
+                  id="lookupServiceType"
+                  {...register("lookup_service_type_id", { required: " must be selected" })}>
+                  <option value="">
+                    Select LookUp Type
+                  </option>
+                  {lookup_types.map((lookup) => (
+                    <option key={lookup.id} value={lookup.id}>
+                      {lookup.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.lookup_service_type_id && (
+                  <div className="invalid-feedback">{PrefixLabels.lookupType.label + errors.lookup_service_type_id.message}</div>
+                )}
               </div>
             </div>
             <div className="form-row">
@@ -458,10 +452,10 @@ const PrefixUpdate = () => {
                     Select Status
                   </option>
                   <option key="status-0" value="1">
-                    {status_t["1"]}
+                    {status_t[1]}
                   </option>
                   <option key="status-1" value="0">
-                    {status_t["0"]}
+                    {status_t[0]}
                   </option>
                 </select>
                 {errors.status && <div className="invalid-feedback">Status must be selected</div>}
@@ -469,27 +463,27 @@ const PrefixUpdate = () => {
             </div>
           </div>
 
-        </div>
-        <div className="row text-end">
-          <div className="column col-10"></div>
-          <div className="column col-2 d-flex justify-content-end">
-            <button
-              type="submit"
-              value="Submit"
-              className="btn btn-primary"
-              style={{ marginRight: "1rem" }}>
-              Update
-            </button>
-            <button
-              onClick={() => {
-                navigate("/prefixes/");
-              }}
-              className="btn btn-dark">
-              Back
-            </button>
+          <div className="row text-end">
+            <div className="column col-10"></div>
+            <div className="column col-2 d-flex justify-content-end">
+              <button
+                type="submit"
+                value="Submit"
+                className="btn btn-bd-warning"
+                style={{ marginRight: "1rem" }}>
+                Update
+              </button>
+              <button
+                onClick={() => {
+                  navigate("/prefixes/");
+                }}
+                className="btn btn-dark">
+                Back
+              </button>
+            </div>
           </div>
-        </div>
-      </form>
+        </form >
+      </div>
     </div>
   );
 };

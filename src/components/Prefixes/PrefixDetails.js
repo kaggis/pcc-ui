@@ -210,26 +210,26 @@ const PrefixDetails = (props) => {
                                         </div>
                                     </div>
                                 }
-                                {prefix && prefix.contract_type &&
+                                {prefix && prefix.contract_type_name &&
                                     <div className="row">
                                         <div className="col-auto">
                                             <div className="input-group mb-2">
                                                 <div className="input-group-prepend">
                                                     <div className="input-group-text">Contract Type: </div>
                                                 </div>
-                                                <span type="text" className="form-control" > {prefix.contract_type}</span>
+                                                <span type="text" className="form-control" > {prefix.contract_type_name}</span>
                                             </div>
                                         </div>
                                     </div>
                                 }
-                                {prefix && prefix.lookup_service_type &&
+                                {prefix && prefix.lookup_service_type_name &&
                                     <div className="row">
                                         <div className="col-auto">
                                             <div className="input-group mb-2">
                                                 <div className="input-group-prepend">
                                                     <div className="input-group-text">Lookup Type: </div>
                                                 </div>
-                                                <span type="text" className="form-control" > {prefix.lookup_service_type}</span>
+                                                <span type="text" className="form-control" > {prefix.lookup_service_type_name}</span>
                                             </div>
                                         </div>
                                     </div>

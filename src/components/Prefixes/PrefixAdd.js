@@ -1,26 +1,17 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Alert from "../Alert";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import moment from 'moment'
-
 import { Controller, useForm } from "react-hook-form";
 import DatePicker from 'react-datepicker';
-
 import DataManager from "../../api/DataManager";
 import config from "../../config";
 import { PrefixLabels } from "./info"
 
-
 const status_t = {
-  "0": "Missing",
-  "1": "Exists"
-};
-
-const contract_type_t = {
-  "CONTRACT": "CONTRACT",
-  "PROJECT": "PROJECT",
-  "OTHER": "OTHER"
+  0: "Missing",
+  1: "Exists"
 };
 
 const PrefixAdd = () => {
@@ -32,23 +23,22 @@ const PrefixAdd = () => {
 
   const dateFormat = "YYYY-MM-DD[T]HH:mm:ss[Z]"
   const [formDefaultValues, setDefaultFormValues] = useState({
-    service_id: [],
-    provider_id: [],
-    domain_id: [],
-    status: "",
+    service_id: 0,
+    provider_id: 0,
+    domain_id: 0,
+    status: 0,
     owner: "",
     contact_name: "",
     contact_email: "",
     contract_end: "",
-    contract_type: "",
-    lookup_service_type: ""
+    contract_type_id: 0,
+    lookup_service_type_id: 0
   })
 
   const {
     control,
     register,
     handleSubmit,
-    reset,
     formState: { errors }
   } = useForm({
     defaultValues: useMemo(() => {
@@ -82,105 +72,76 @@ const PrefixAdd = () => {
     });
   }, []);
 
-  const [lookup_service_types, setLookUpServiceTypes] = useState([]);
+  const [contract_types, setContractTypes] = useState([]);
   useEffect(() => {
     let DM = new DataManager(config.endpoint);
-    DM.getReverseLookUpTypes().then((response) => {
-      setLookUpServiceTypes(response);
+    DM.getCodelistContract().then((response) => {
+      setContractTypes(response);
     });
   }, []);
 
+  const [lookup_types, setLookUpTypes] = useState([]);
   useEffect(() => {
-    setDefaultFormValues(
-      {
-        ...formDefaultValues,
-        ...{
-          lookup_service_type: (lookup_service_types && lookup_service_types.length > 0 ? "" : formDefaultValues.lookup_service_type)
-        }
-      }
-    );
-    reset(
-      {
-        ...formDefaultValues,
-        ...{
-          lookup_service_type: formDefaultValues.lookup_service_type
-        }
-      }
-    );
-  }, [lookup_service_types]);
+    let DM = new DataManager(config.endpoint);
+    DM.getCodelistLookup().then((response) => {
+      setLookUpTypes(response);
+    });
+  }, []);
 
   const onformSubmit = (data) => {
     if (data["contract_end"] !== null && data["contract_end"] !== "") {
       data["contract_end"] = moment(data["contract_end"]).format(dateFormat);
     }
-    if (data["provider_id"].length == 0) {
-      data["provider_id"] = "";
+
+    data.lookup_service_type_id = parseInt(data.lookup_service_type_id);
+    data.provider_id = parseInt(data.provider_id);
+    data.domain_id = parseInt(data.domain_id);
+    data.service_id = parseInt(data.service_id);
+
+    if (data.service_id == 0) {
+      delete data.service_id;
     }
-    if (data["domain_id"].length == 0) {
-      data["domain_id"] = "";
+    if (data.domain_id == 0) {
+      delete data.domain_id;
     }
-    if (data["service_id"].length == 0) {
-      data["service_id"] = "";
-    }
+
+    data.contract_type_id = parseInt(data.contract_type_id);
+
     let DM = new DataManager(config.endpoint);
-    DM.addPrefix(data).then((r) => {
-      setAlert(true);
-      if (!("message" in r)) {
-        setAlertType("success");
-        setAlertMessage("Prefix succesfully created.");
-        setTimeout(() => {
-          navigate("/prefixes/");
-        }, 2000);
-      }
-      else {
+    DM.addPrefix(data)
+      .then((r) => {
+        setAlert(true);
+        if (!("message" in r)) {
+          setAlertType("success");
+          setAlertMessage("Prefix successfully created.");
+          setTimeout(() => {
+            navigate("/prefixes/");
+          }, 2000);
+        } else {
+          setAlertType("danger");
+          setAlertMessage(r["message"]);
+        }
+      })
+      .catch((error) => {
+        console.error("An error occurred while adding prefix:", error);
+        setAlert(true);
         setAlertType("danger");
-        setAlertMessage(r["message"]);
-      }
-    })
+        setAlertMessage("An error occurred while adding prefix. Please try again later.");
+      });
+
   };
 
-  const lookup_service_type_select = (
-    <>
-      <label htmlFor="status" className="form-label fw-bold">
-        <span className="required">*</span>
-        {PrefixLabels.lookupType.label}
-      </label>
-      <span className="info-icon"> i
-        <span className="info-text">
-          {PrefixLabels.lookupType.info}
-        </span>
-      </span>
-      <select
-        className={`form-select ${errors.lookup_service_type ? "is-invalid" : ""}`}
-        id="lookupServiceType"
-        {...register("lookup_service_type", { required: " must be selected" })}>
-        <option value="">
-          Select Type
-        </option>
-        {lookup_service_types &&
-          lookup_service_types.map((t, i) => {
-            return (
-              <option key={`type-${i}`} value={t}>
-                {t}
-              </option>
-            );
-          })}
-      </select>
-      {errors.lookup_service_type && (
-        <div className="invalid-feedback">{PrefixLabels.lookupType.label + errors.lookup_service_type.message}</div>
-      )}
-    </>
-  );
-
-  // if (providers) {
   return (
-    <div className="container">
+    <div>
       {alert &&
         <Alert type={alertType} message={alertMessage} />
       }
       <form onSubmit={handleSubmit(onformSubmit)}>
-        <div className="row mt-4 text-start">
-          <h2>Create new prefix</h2>
+        <div className="row mt-4 mx-4 text-start">
+          <h2 className="view-title">
+            <i><FontAwesomeIcon icon="plus" size="lg" /></i>
+            <span>Create new Prefix</span>
+          </h2>
           <p className="text-muted"><span className="required">*</span>Indicates a required field</p>
           <div className="form-group">
             <legend>Prefix Details</legend>
@@ -316,7 +277,7 @@ const PrefixAdd = () => {
                   className={`form-select ${errors.provider_id ? "is-invalid" : ""}`}
                   id="providerID"
                   {...register("provider_id", { required: " must be selected" })}>
-                  <option value="">
+                  <option>
                     Select Provider
                   </option>
                   {providers.map((provider) => (
@@ -342,7 +303,7 @@ const PrefixAdd = () => {
                   className={`form-select ${errors.service_id ? "is-invalid" : ""}`}
                   id="serviceID"
                   {...register("service_id", { required: false })}>
-                  <option value="">
+                  <option>
                     Select Service
                   </option>
                   {services.map((service) => (
@@ -368,7 +329,7 @@ const PrefixAdd = () => {
                   className={`form-select ${errors.domain_id ? "is-invalid" : ""}`}
                   id="domainID"
                   {...register("domain_id", { required: false })}>
-                  <option value="">
+                  <option>
                     Select Domain
                   </option>
                   {domains.map((domain) => (
@@ -395,25 +356,46 @@ const PrefixAdd = () => {
                   </span>
                 </span>
                 <select
-                  className={`form-select ${errors.contract_type ? "is-invalid" : ""}`}
+                  className={`form-select ${errors.contract_type_id ? "is-invalid" : ""}`}
                   id="prefixContractType"
-                  {...register("contract_type", { required: " must be selected" })}>
+                  {...register("contract_type_id", { required: " must be selected" })}>
                   <option value="">
                     Select Contract Type
                   </option>
-                  {Object.entries(contract_type_t).map((contract) => (
-                    <option key={"contract-" + contract[0]} value={contract[0]}>
-                      {contract[0]}
+                  {contract_types.map((contract) => (
+                    <option key={contract.id} value={contract.id}>
+                      {contract.name}{" "}
                     </option>
                   ))}
                 </select>
-                {errors.contract_type &&
-                  <div className="invalid-feedback">{PrefixLabels.contractType.label + errors.contract_type.message}</div>}
+                {errors.contract_type_id &&
+                  <div className="invalid-feedback">{PrefixLabels.contractType.label + errors.contract_type_id.message}</div>}
               </div>
               <div className="mb-3">
-                {lookup_service_types && lookup_service_types.length > 0
-                  ? lookup_service_type_select
-                  : null}
+                <label htmlFor="prefixLookupType" className="form-label fw-bold">
+                  <span className="required">*</span>
+                  {PrefixLabels.lookupType.label}
+                </label>
+                <span className="info-icon"> i
+                  <span className="info-text">
+                    {PrefixLabels.lookupType.info}
+                  </span>
+                </span>
+                <select
+                  className={`form-select ${errors.lookup_service_type_id ? "is-invalid" : ""}`}
+                  id="prefixLookupType"
+                  {...register("lookup_service_type_id", { required: " must be selected" })}>
+                  <option value="">
+                    Select LookUp Type
+                  </option>
+                  {lookup_types.map((lookup) => (
+                    <option key={lookup.id} value={lookup.id}>
+                      {lookup.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.lookup_service_type_id &&
+                  <div className="invalid-feedback">{PrefixLabels.lookupType.label + errors.lookup_service_type_id.message}</div>}
               </div>
             </div>
             <div className="form-row">
@@ -457,10 +439,10 @@ const PrefixAdd = () => {
                     Select Status
                   </option>
                   <option key="status-0" value="1">
-                    {status_t["1"]}
+                    {status_t[1]}
                   </option>
                   <option key="status-1" value="0">
-                    {status_t["0"]}
+                    {status_t[0]}
                   </option>
                 </select>
                 {errors.status && <div className="invalid-feedback">Status must be selected</div>}
@@ -473,7 +455,7 @@ const PrefixAdd = () => {
               <button
                 type="submit"
                 value="Submit"
-                className="btn btn-primary"
+                className="btn btn-bd-warning"
                 style={{ marginRight: "1rem" }}>
                 Create
               </button>
@@ -491,9 +473,6 @@ const PrefixAdd = () => {
       </form>
     </div>
   );
-  // } else {
-  //   return <></>;
-  // }
 };
 
 export default PrefixAdd;

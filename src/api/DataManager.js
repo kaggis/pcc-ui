@@ -99,6 +99,27 @@ class DataManager {
     return this.doGet(url, "filters");
   }
 
+  getCodelist() {
+    let url = this.endpoint + "/codelist";
+    return this.doGet(url, "codelist");
+  }
+
+  getCodelistCategory(category) {
+    let url = this.endpoint + "/codelist";
+    url += `?category=${category}`;
+    return this.doGet(url, "codelist");
+  }
+
+  getCodelistLookup() {
+    let url = this.endpoint + "/codelist?category=lookup_service_type";
+    return this.doGet(url, "codelist");
+  }
+
+  getCodelistContract() {
+    let url = this.endpoint + "/codelist?category=contract_type";
+    return this.doGet(url, "codelist");
+  }
+
   addPrefix(data) {
     let url = this.endpoint + "/prefixes";
     return this.doSend("POST", url, data);

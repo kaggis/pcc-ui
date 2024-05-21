@@ -8,14 +8,13 @@ import DataManager from "../../api/DataManager";
 import config from "../../config";
 import DataTable from 'react-data-table-component';
 import PrefixDetails from "./PrefixDetails";
-import PrefixAdd from "./PrefixAdd"
-import PrefixUpdate from "./PrefixUpdate"
-import PrefixLookup from "./PrefixLookup"
+import PrefixAdd from "./PrefixAdd";
+import PrefixUpdate from "./PrefixUpdate";
+import PrefixLookup from "./PrefixLookup";
 import PrefixEditStats from "./PrefixEditStats";
 import { StyleSheetManager } from 'styled-components';
 import './prefix.css';
 import { OverlayTrigger, Tooltip, Button, Tab, Tabs, Form } from 'react-bootstrap';
-
 
 String.prototype.toPascalCase = function () {
   const words = this.match(/[a-z]+/gi);
@@ -25,12 +24,6 @@ String.prototype.toPascalCase = function () {
       return w.charAt(0).toUpperCase() + w.substr(1).toLowerCase();
     })
     .join(" ");
-};
-
-const contract_type_t = {
-  "CONTRACT": "CONTRACT",
-  "PROJECT": "PROJECT",
-  "OTHER": "OTHER"
 };
 
 const tooltipList = (
@@ -45,67 +38,6 @@ const tooltipTimes = (
 const tooltipChartBar = (
   <Tooltip id="tooltip">Edit Statistics</Tooltip>
 );
-
-const columns = [
-  {
-    name: 'Name',
-    selector: row => row.name,
-    sortable: true,
-    cell: (row) => (
-      <div className="row">
-        <div className="col-4" style={{ fontSize: "2rem" }}>
-          📦
-        </div>
-        <div className="col-8">
-          <div>{row.name} </div>
-          <div style={{ color: 'gray', fontSize: '12px' }}>by: {row.provider_name}</div>
-        </div>
-      </div>
-    ),
-  },
-  {
-    name: 'Owner',
-    selector: row => row.owner,
-    sortable: true,
-  },
-  {
-    name: 'Domain',
-    selector: row => row.domain_name,
-    sortable: true,
-  },
-  {
-    name: 'Contract Type',
-    selector: row => row.contract_type,
-    sortable: true,
-  },
-  {
-    name: 'Actions',
-    cell: (row) => (
-      <div className="btn-group">
-        <OverlayTrigger placement="top" overlay={tooltipList}>
-          <Button variant="light" size="sm" onClick={() => window.location.href = `/prefixes/${row.id}`}>
-            <FontAwesomeIcon icon={faList} />
-          </Button>
-        </OverlayTrigger>
-        <OverlayTrigger placement="top" overlay={tooltipEdit}>
-          <Button variant="light" size="sm" onClick={() => window.location.href = `/prefixes/${row.id}/update`}>
-            <FontAwesomeIcon icon={faEdit} />
-          </Button>
-        </OverlayTrigger>
-        <OverlayTrigger placement="top" overlay={tooltipTimes}>
-          <Button variant="light" size="sm" onClick={() => window.location.href = `/prefixes/${row.id}/delete`}>
-            <FontAwesomeIcon icon={faTrashCan} />
-          </Button>
-        </OverlayTrigger>
-        <OverlayTrigger placement="top" overlay={tooltipChartBar}>
-          <Button variant="light" size="sm" onClick={() => window.location.href = `/prefixes/editstatistics/${row.id}`}>
-            <FontAwesomeIcon icon={faChartBar} />
-          </Button>
-        </OverlayTrigger>
-      </div>
-    ),
-  },
-];
 
 const customStyles = {
   headCells: {
@@ -139,6 +71,7 @@ const Prefixes = () => {
   const [key, setTabKey] = useState('');
   const [providers, setProviders] = useState([]);
   const [domains, setDomains] = useState([]);
+  const [contract_types, setContractTypes] = useState([]);
 
   useEffect(() => {
     let DM = new DataManager(config.endpoint);
@@ -154,7 +87,76 @@ const Prefixes = () => {
       .then((response) => setProviders(response))
       .catch((error) => console.error("Error fetching providers:", error));
 
+    DM.getCodelistContract()
+      .then((response) => setContractTypes(response))
+      .catch((error) => console.error("Error fetching Contracts:", error));
   }, []);
+
+  const idToName = {};
+  contract_types.forEach(type => {
+    idToName[type.id] = type.name;
+  });
+
+  const columns = [
+    {
+      name: 'Name',
+      selector: row => row.name,
+      sortable: true,
+      cell: (row) => (
+        <div className="row">
+          <div className="col-4" style={{ fontSize: "2rem" }}>
+            📦
+          </div>
+          <div className="col-8">
+            <div>{row.name} </div>
+            <div style={{ color: 'gray', fontSize: '12px' }}>by: {row.provider_name}</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      name: 'Owner',
+      selector: row => row.owner,
+      sortable: true,
+    },
+    {
+      name: 'Domain',
+      selector: row => row.domain_name,
+      sortable: true,
+    },
+    {
+      name: 'Contract Type',
+      selector: row => row.contract_type_name,
+      sortable: true,
+    },
+    {
+      name: 'Actions',
+      cell: (row) => (
+        <div className="btn-group">
+          <OverlayTrigger placement="top" overlay={tooltipList}>
+            <Button variant="light" size="sm" onClick={() => window.location.href = `/prefixes/${row.id}`}>
+              <FontAwesomeIcon icon={faList} />
+            </Button>
+          </OverlayTrigger>
+          <OverlayTrigger placement="top" overlay={tooltipEdit}>
+            <Button variant="light" size="sm" onClick={() => window.location.href = `/prefixes/${row.id}/update`}>
+              <FontAwesomeIcon icon={faEdit} />
+            </Button>
+          </OverlayTrigger>
+          <OverlayTrigger placement="top" overlay={tooltipTimes}>
+            <Button variant="light" size="sm" onClick={() => window.location.href = `/prefixes/${row.id}/delete`}>
+              <FontAwesomeIcon icon={faTrashCan} />
+            </Button>
+          </OverlayTrigger>
+          <OverlayTrigger placement="top" overlay={tooltipChartBar}>
+            <Button variant="light" size="sm" onClick={() => window.location.href = `/prefixes/editstatistics/${row.id}`}>
+              <FontAwesomeIcon icon={faChartBar} />
+            </Button>
+          </OverlayTrigger>
+        </div>
+      ),
+    },
+  ];
 
   const filteredPrefixesProviders = prefixes.filter(
     (item) => item.provider_name && item.provider_name.toLowerCase().includes(filterProvider.toLowerCase())
@@ -163,10 +165,10 @@ const Prefixes = () => {
   const filteredPrefixesByDomain = filteredPrefixesProviders.filter((item) => {
     return (
       (!filterDomains || item.domain_name === filterDomains) &&
-      (!filterContactType || item.contract_type === filterContactType) &&
+      (!filterContactType || item.contract_type_name === filterContactType) &&
       Object.values(item).some((value) => value && typeof value === 'string' && value.toLowerCase().includes(filterText.toLowerCase()))
     );
-  });
+  });  
 
   const subHeaderComponentMemo = useMemo(() => {
     const handleClear = () => {
@@ -198,11 +200,11 @@ const Prefixes = () => {
                 ))}
               </Form.Select>
             </div><div className="col-3">
-              <Form.Select id="contactSelection" name="formSelectContact" aria-label="Default select example" onChange={(e) => setFilterContactType(e.target.value)}   >
+              <Form.Select id="contactSelection" name="formSelectContact" aria-label="Contact Selection" onChange={(e) => setFilterContactType(e.target.value)}   >
                 <option id="All" value=''>Select Contract</option>
-                {Object.entries(contract_type_t).map((contract) => (
-                  <option id={contract[0]} key={"contract-" + contract[0]} value={contract[0]}>
-                    {contract[0]}
+                {contract_types.length > 0 && contract_types.map((contract) => (
+                  <option key={contract.id} value={contract.name}>
+                    {contract.name}
                   </option>
                 ))}
               </Form.Select>
