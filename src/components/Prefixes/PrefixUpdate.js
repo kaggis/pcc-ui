@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Alert from "../Alert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import moment from 'moment'
+import moment from 'moment';
 import { Controller, useForm } from "react-hook-form";
 import DatePicker from 'react-datepicker';
 import DataManager from "../../api/DataManager";
 import config from "../../config";
-import { PrefixLabels } from "./info"
+import { PrefixLabels } from "./info";
 
 const status_t = {
   0: "Missing",
@@ -22,6 +22,7 @@ const PrefixUpdate = () => {
   const [alert, setAlert] = useState(false);
   const [alertType, setAlertType] = useState("success");
   const [alertMessage, setAlertMessage] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const dateFormat = "YYYY-MM-DD[T]HH:mm:ss[Z]";
 
@@ -36,69 +37,59 @@ const PrefixUpdate = () => {
     reValidateMode: "onChange"
   });
 
-  useEffect(() => {
-    let DM = new DataManager(config.endpoint);
-    DM.getPrefixes(params.id).then((response) => {
-      const d = {
-        name: response.name,
-        service_id: response.service_id,
-        provider_id: response.provider_id,
-        domain_id: response.domain_id,
-        owner: response.owner,
-        contact_name: response.contact_name,
-        contact_email: response.contact_email,
-        contract_end: response.contract_end ? moment(response.contract_end, dateFormat).toDate() : null,
-        contract_type_id: response.contract_type_id,
-        used_by: response.used_by,
-        status: response.status,
-        lookup_service_type_id: response.lookup_service_type_id
-      };
-      setDefaultFormValues(d)
-      reset(d);
-    });
-  }, [params.id]);
-
   const [providers, setProviders] = useState([]);
-  useEffect(() => {
-    let DM = new DataManager(config.endpoint);
-    DM.getProviders().then((response) => {
-      setProviders(response);
-    });
-  }, []);
-
   const [domains, setDomains] = useState([]);
-  useEffect(() => {
-    let DM = new DataManager(config.endpoint);
-    DM.getDomains().then((response) => {
-      setDomains(response);
-    });
-  }, []);
-
   const [services, setServices] = useState([]);
-  useEffect(() => {
-    let DM = new DataManager(config.endpoint);
-    DM.getServices().then((response) => {
-      setServices(response);
-    });
-  }, []);
-
   const [contract_types, setContractTypes] = useState([]);
-  useEffect(() => {
-    let DM = new DataManager(config.endpoint);
-    DM.getCodelistContract().then((response) => {
-      setContractTypes(response);
-    });
-  }, []);
-
   const [lookup_types, setLookUpTypes] = useState([]);
-  useEffect(() => {
-    let DM = new DataManager(config.endpoint);
-    DM.getCodelistLookup().then((response) => {
-      setLookUpTypes(response);
-    });
-  }, []);
 
-  const onformSubmit = (data) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      let DM = new DataManager(config.endpoint);
+      try {
+        const [prefixResponse, domainsResponse, providersResponse, servicesResponse, lookupResponse, contractResponse] = await Promise.all([
+          DM.getPrefixes(params.id),
+          DM.getDomains(),
+          DM.getProviders(),
+          DM.getServices(),
+          DM.getCodelistLookup(),
+          DM.getCodelistContract()
+        ]);
+
+        const d = {
+          name: prefixResponse.name,
+          service_id: prefixResponse.service_id,
+          provider_id: prefixResponse.provider_id,
+          domain_id: prefixResponse.domain_id,
+          owner: prefixResponse.owner,
+          contact_name: prefixResponse.contact_name,
+          contact_email: prefixResponse.contact_email,
+          contract_end: prefixResponse.contract_end ? moment(prefixResponse.contract_end, dateFormat).toDate() : null,
+          contract_type_id: prefixResponse.contract_type_id,
+          used_by: prefixResponse.used_by,
+          status: prefixResponse.status,
+          lookup_service_type_id: prefixResponse.lookup_service_type_id
+        };
+        setDefaultFormValues(d);
+        reset(d);
+
+        setDomains(domainsResponse);
+        setProviders(providersResponse);
+        setServices(servicesResponse);
+        setLookUpTypes(lookupResponse);
+        setContractTypes(contractResponse);
+
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [params.id, reset, dateFormat]);
+
+  const onFormSubmit = (data) => {
     let DM = new DataManager(config.endpoint);
     let method = "PATCH";
 
@@ -126,31 +117,34 @@ const PrefixUpdate = () => {
       setAlert(true);
       if (!("message" in r)) {
         setAlertType("success");
-        setAlertMessage("Prefix succesfully updated.");
+        setAlertMessage("Prefix successfully updated.");
         setTimeout(() => {
           navigate("/prefixes/");
         }, 2000);
-      }
-      else {
+      } else {
         setAlertType("danger");
         setAlertMessage(r["message"]);
       }
     });
   };
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div>
       {alert &&
         <Alert type={alertType} message={alertMessage} />
       }
-      <div className="col mx-4 mt-4" >
+      <div className="col mx-4 mt-4">
         <h2 className="view-title">
           <i> <FontAwesomeIcon icon="edit" size="lg" /></i>
           <span>Update prefix</span>
         </h2>
         <p className="text-muted"><span className="required">*</span>Indicates a required field</p>
 
-        <form onSubmit={handleSubmit(onformSubmit)}>
+        <form onSubmit={handleSubmit(onFormSubmit)}>
 
           <div className="form-group">
             <legend>Prefix Details</legend>
