@@ -1,38 +1,73 @@
-# PCC-UI
+# React + TypeScript + Vite
 
-A ReactJS application for the PID Central Catalogue (PCC)
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Configuration
+Currently, two official plugins are available:
 
-The pcc-ui application provides a simple way to configure connection through the `config.js` file. Before using just set the `endpoint` parameter appropriately.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-The `public` directory of the project may host specific assets such as the `favicon.ico` and the `logo.svg`.
+## React Compiler
 
-## Installation
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-### Development mode
+## Expanding the ESLint configuration
 
-1. `git clone https://github.com/ARGOeu/pcc-ui.git`
-2. `cd pcc-ui`
-3. `npm install`
-4. `npm start`
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-This will run the app in the development mode.Open http://localhost:3000 to view it in your browser.
- 
-The page will reload when you make changes.
-You may also see any lint errors in the console.
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-### Production mode
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-1. `git clone https://github.com/ARGOeu/pcc-ui.git`
-2. `cd pcc-ui`
-3. `npm install`
-4. `npm run build`
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
 
-This will build the app for production to the `build` folder.
-It correctly bundles React in production mode and optimizes the build for the best performance.
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-The build is minified and the filenames include the hashes.
-Your app is ready to be deployed!
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
